@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Control de Producción</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #111827;
+            color: #F9FAFB;
+        }
+        .card {
+            background-color: #1F2937;
+            border: 1px solid #374151;
+        }
+        .label {
+            color: #9CA3AF;
+            font-size: 0.8rem;
+        }
+        .input, .select {
+            background-color: #374151;
+            border: 1px solid #4B5563;
+            color: #F9FAFB;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .input:focus, .select:focus {
+            outline: none;
+            border-color: #3B82F6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.4);
+        }
+        .btn-primary {
+            background-color: #2563EB;
+            transition: background-color 0.2s;
+        }
+        .btn-primary:hover {
+            background-color: #1D4ED8;
+        }
+        .btn-danger {
+            background-color: #DC2626;
+            transition: background-color 0.2s;
+        }
+        .btn-danger:hover {
+            background-color: #B91C1C;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+    </style>
+</head>
+<body class="p-4 md:p-6">
+    <div class="max-w-7xl mx-auto space-y-8">
+        <!-- SECCIÓN DE NUEVO REGISTRO -->
+        <div class="card p-6 rounded-lg shadow-md">
+            <h1 class="text-2xl font-bold mb-6 text-white text-center">Control de Parámetros de Producción</h1>
+            <form id="recordForm" class="space-y-6">
+                
+                <!-- SECCIÓN PRODUCTO -->
+                <div>
+                    <h2 class="text-xl font-semibold text-blue-400 mb-3">Producto</h2>
+                    <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+                        <div><label for="kd" class="label block mb-1">CÓDIGO (KD)</label><input type="text" id="kd" class="input w-full p-2 rounded-md text-sm"></div>
+                        <div><label for="nombre" class="label block mb-1">NOMBRE</label><input type="text" id="nombre" class="input w-full p-2 rounded-md text-sm"></div>
+                        <div><label for="espesor" class="label block mb-1">ESPESOR</label><input type="text" id="espesor" class="input w-full p-2 rounded-md text-sm"></div>
+                        <div><label for="largo" class="label block mb-1">LARGO</label><input type="text" id="largo" class="input w-full p-2 rounded-md text-sm"></div>
+                        <div><label for="ancho" class="label block mb-1">ANCHO</label><input type="text" id="ancho" class="input w-full p-2 rounded-md text-sm"></div>
+                    </div>
+                </div>
+
+                <hr class="border-gray-600">
+                              <!-- SECCIONES CENTRALES -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <!-- Columna 1: Parámetros Generales y Otros -->
+                    <div class="space-y-6">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div><label for="fecha" class="label block mb-1">FECHA</label><input type="date" id="fecha" class="input w-full p-2 rounded-md text-sm"></div>
+                            <div><label for="rc" class="label block mb-1">RC</label><input type="text" id="rc" class="input w-full p-2 rounded-md text-sm"></div>
+                            <div><label for="n_capas" class="label block mb-1">Nº CAPAS</label><input type="text" id="n_capas" class="input w-full p-2 rounded-md text-sm"></div>
+                            <div><label for="tirada" class="label block mb-1">TIRADA</label><input type="text" id="tirada" class="input w-full p-2 rounded-md text-sm"></div>
+                            <div><label for="velocidad" class="label block mb-1">VELOCIDAD</label><input type="text" id="velocidad" class="input w-full p-2 rounded-md text-sm"></div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div><label for="peso_bascula" class="label block mb-1">PESO BASCULA</label><input type="text" id="peso_bascula" class="input w-full p-2 rounded-md text-sm"></div>
+                            <div><label for="ancho_pr" class="label block mb-1">ANCHO PR./Kn</label><input type="text" id="ancho_pr" class="input w-full p-2 rounded-md text-sm"></div>
+                            <div><label for="estufa_param" class="label block mb-1">ESTUFA</label><input type="text" id="estufa_param" class="input w-full p-2 rounded-md text-sm"></div>
+                            <div><label for="pulidora" class="label block mb-1">PULIDORA</label><input type="text" id="pulidora" class="input w-full p-2 rounded-md text-sm"></div>
+                        </div>
+                    </div>
+
+                    <!-- Columna 2: Estufa -->
+                    <div class="space-y-3">
+                        <h2 class="text-lg font-semibold text-blue-400 border-b border-gray-600 pb-2">Estufa</h2>
+                        <div class="grid grid-cols-3 gap-2 items-center">
+                            <span class="label text-center">CAJON Nº1</span>
+                            <input type="text" id="cajon1_temp" placeholder="TEMP" class="input w-full p-2 rounded-md text-sm">
+                            <input type="text" id="cajon1_rev" placeholder="REV" class="input w-full p-2 rounded-md text-sm">
+                        </div>
+                         <div class="grid grid-cols-3 gap-2 items-center">
+                            <span class="label text-center">CAJON Nº2</span>
+                            <input type="text" id="cajon2_temp" placeholder="TEMP" class="input w-full p-2 rounded-md text-sm">
+                            <input type="text" id="cajon2_rev" placeholder="REV" class="input w-full p-2 rounded-md text-sm">
+                        </div>
+                         <div class="grid grid-cols-3 gap-2 items-center">
+                            <span class="label text-center">CAJON Nº3</span>
+                            <input type="text" id="cajon3_temp" placeholder="TEMP" class="input w-full p-2 rounded-md text-sm">
+                            <input type="text" id="cajon3_rev" placeholder="REV" class="input w-full p-2 rounded-md text-sm">
+                        </div>
+                         <div class="grid grid-cols-3 gap-2 items-center">
+                            <span class="label text-center">CAJON Nº4</span>
+                            <input type="text" id="cajon4_temp" placeholder="TEMP" class="input w-full p-2 rounded-md text-sm">
+                            <input type="text" id="cajon4_rev" placeholder="REV" class="input w-full p-2 rounded-md text-sm">
+                        </div>
+                    </div>
+
+                    <!-- Columna 3: Crepadora y Mesa de Enfriamiento -->
+                    <div class="space-y-6">
+                         <div>
+                            <h2 class="text-lg font-semibold text-blue-400 border-b border-gray-600 pb-2">Crepadora</h2>
+                             <div class="grid grid-cols-6 gap-2 mt-3">
+                                 <input type="text" id="h1" placeholder="H1" class="input w-full p-2 rounded-md text-sm">
+                                 <input type="text" id="h2" placeholder="H2" class="input w-full p-2 rounded-md text-sm">
+                                 <input type="text" id="h3" placeholder="H3" class="input w-full p-2 rounded-md text-sm">
+                                 <input type="text" id="h4" placeholder="H4" class="input w-full p-2 rounded-md text-sm">
+                                 <input type="text" id="h5" placeholder="H5" class="input w-full p-2 rounded-md text-sm">
+                                 <input type="text" id="h6" placeholder="H6" class="input w-full p-2 rounded-md text-sm">
+                             </div>
+                         </div>
+                         <div>
+                            <h2 class="text-lg font-semibold text-blue-400 border-b border-gray-600 pb-2">Mesa de Enfriamiento</h2>
+                            <div class="grid grid-cols-1 gap-4 mt-3">
+                                <div><label for="mesa_estiramiento" class="label block mb-1">ESTIRAMIENTO</label><input type="text" id="mesa_estiramiento" class="input w-full p-2 rounded-md text-sm"></div>
+                            </div>
+                         </div>
+                    </div>
+                </div>
+                                <div class="pt-4">
+                    <button type="submit" class="btn-primary w-full font-bold py-3 px-4 rounded-md text-white">Guardar Registro</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- SECCIÓN DE BÚSQUEDA -->
+        <div class="card p-6 rounded-lg shadow-md">
+            <h2 class="text-xl font-bold mb-4">Buscar Registros</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="searchField" class="label block text-sm font-medium mb-1">Buscar por:</label>
+                    <select id="searchField" class="select w-full p-2 rounded-md text-sm">
+                         <option value="kd">Código (KD)</option>
+                         <option value="fecha">Fecha</option>
+                         <option value="nombre">Nombre</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="searchValueContainer" class="label block text-sm font-medium mb-1">Valor:</label>
+                    <div id="searchValueContainer">
+                        <input type="text" class="input w-full p-2 rounded-md text-sm">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECCIÓN DE REGISTROS -->
+        <div>
+            <h2 class="text-2xl font-bold mb-4 text-center">Registros Guardados</h2>
+            <div id="recordsContainer" class="space-y-4"></div>
+        </div>
+    </div>
+    
+    <!-- Toast & Modal -->
+    <div id="toast" class="fixed bottom-5 right-5 bg-green-500 text-white py-2 px-4 rounded-lg shadow-lg transform translate-y-20 opacity-0 transition-all duration-300"></div>
+    <div id="deleteModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+        <div class="card p-6 rounded-lg shadow-xl max-w-sm w-full mx-4">
+            <h3 class="text-lg font-bold mb-4">Confirmar Eliminación</h3>
+            <p class="text-gray-300 mb-6">¿Estás seguro de que quieres eliminar este registro?</p>
+            <div class="flex justify-end space-x-4">
+                <button id="cancelDelete" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded">Cancelar</button>
+                <button id="confirmDelete" class="btn-danger text-white font-bold py-2 px-4 rounded">Eliminar</button>
+            </div>
+        </div>
+    </div>
+        <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, doc, deleteDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        const recordForm = document.getElementById('recordForm');
+        const recordsContainer = document.getElementById('recordsContainer');
+        const searchField = document.getElementById('searchField');
+        const searchValueContainer = document.getElementById('searchValueContainer');
+        const toast = document.getElementById('toast');
+        const deleteModal = document.getElementById('deleteModal');
+        const cancelDeleteBtn = document.getElementById('cancelDelete');
+        const confirmDeleteBtn = document.getElementById('confirmDelete');
+        let recordToDeleteId = null;
+
+        let allRecords = [];
+        let uniqueFieldValues = {};
+
+        function setInitialDate() {
+            const today = new Date();
+            document.getElementById('fecha').value = today.toISOString().split('T')[0];
+        }
+        setInitialDate();
+
+        onAuthStateChanged(auth, user => {
+            if (user) {
+                setupFirestoreListener(user.uid);
+            } else {
+                signInAnonymously(auth).catch(error => console.error("Auth Error:", error));
+            }
+        });
+        
+        function showToast(message) {
+            toast.textContent = message;
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => toast.classList.add('translate-y-20', 'opacity-0'), 3000);
+        }
+
+        function openDeleteModal(docId) {
+            recordToDeleteId = docId;
+            deleteModal.classList.remove('hidden');
+        }
+
+        cancelDeleteBtn.addEventListener('click', () => deleteModal.classList.add('hidden'));
+        confirmDeleteBtn.addEventListener('click', async () => {
+            if (recordToDeleteId) {
+                const userId = auth.currentUser.uid;
+                try {
+                    await deleteDoc(doc(db, `artifacts/${appId}/users/${userId}/registros`, recordToDeleteId));
+                    showToast("Registro eliminado.");
+                } catch (error) { console.error("Delete Error:", error); } 
+                finally { deleteModal.classList.add('hidden'); }
+            }
+        });
+
+        function setupFirestoreListener(userId) {
+            const q = query(collection(db, `artifacts/${appId}/users/${userId}/registros`), orderBy('createdAt', 'desc'));
+            onSnapshot(q, (snapshot) => {
+                allRecords = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+                processRecordsForSearch(allRecords);
+                updateSearchInput();
+                applyFilters();
+            }, (error) => console.error("Snapshot Error: ", error));
+        }
+
+        recordForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const userId = auth.currentUser?.uid;
+            if (!userId) return;
+
+            const newRecord = {
+                // Producto
+                kd: document.getElementById('kd').value,
+                nombre: document.getElementById('nombre').value,
+                espesor: document.getElementById('espesor').value,
+                largo: document.getElementById('largo').value,
+                ancho: document.getElementById('ancho').value,
+                // Params Generales
+                fecha: document.getElementById('fecha').value,
+                rc: document.getElementById('rc').value,
+                n_capas: document.getElementById('n_capas').value,
+                tirada: document.getElementById('tirada').value,
+                velocidad: document.getElementById('velocidad').value,
+                // Otros Params
+                peso_bascula: document.getElementById('peso_bascula').value,
+                ancho_pr: document.getElementById('ancho_pr').value,
+                estufa_param: document.getElementById('estufa_param').value,
+                pulidora: document.getElementById('pulidora').value,
+                // Estufa
+                cajon1_temp: document.getElementById('cajon1_temp').value,
+                cajon1_rev: document.getElementById('cajon1_rev').value,
+                cajon2_temp: document.getElementById('cajon2_temp').value,
+                cajon2_rev: document.getElementById('cajon2_rev').value,
+                cajon3_temp: document.getElementById('cajon3_temp').value,
+                cajon3_rev: document.getElementById('cajon3_rev').value,
+                cajon4_temp: document.getElementById('cajon4_temp').value,
+                cajon4_rev: document.getElementById('cajon4_rev').value,
+                // Crepadora
+                h1: document.getElementById('h1').value, h2: document.getElementById('h2').value,
+                h3: document.getElementById('h3').value, h4: document.getElementById('h4').value,
+                h5: document.getElementById('h5').value, h6: document.getElementById('h6').value,
+                // Mesa de Enfriamiento
+                mesa_estiramiento: document.getElementById('mesa_estiramiento').value,
+                createdAt: serverTimestamp()
+            };
+
+            try {
+                await addDoc(collection(db, `artifacts/${appId}/users/${userId}/registros`), newRecord);
+                showToast("¡Registro guardado!");
+                recordForm.reset();
+                setInitialDate();
+            } catch (error) { console.error("Save Error: ", error); }
+        });
+        
+        function processRecordsForSearch(records) {
+            const fields = ['kd', 'fecha', 'nombre'];
+            uniqueFieldValues = {};
+            fields.forEach(field => {
+                const values = new Set(records.map(r => r[field]).filter(Boolean));
+                uniqueFieldValues[field] = [...values].sort();
+            });
+        }
+
+        function renderRecords(records) {
+            recordsContainer.innerHTML = records.length === 0 
+                ? `<p class="text-center text-gray-400">No hay registros.</p>` 
+                : '';
+            records.forEach((record, index) => {
+                const card = document.createElement('div');
+                card.className = 'card p-4 rounded-lg shadow-md fade-in';
+                card.style.animationDelay = `${index * 50}ms`;
+                card.innerHTML = `
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h3 class="text-lg font-bold text-blue-400">KD: ${record.kd || 'N/A'}</h3>
+                            <p class="text-sm text-gray-400">Fecha: ${record.fecha || 'N/A'}</p>
+                            <p class="text-sm text-gray-300">Nombre: ${record.nombre || 'N/A'}</p>
+                        </div>
+                        <button data-id="${record.id}" class="delete-btn btn-danger text-white p-2 rounded-full w-8 h-8 flex items-center justify-center flex-shrink-0">&times;</button>
+                    </div>
+                    <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-x-4 gap-y-2 text-sm border-t border-gray-700 pt-3 mt-3">
+                        <div><strong class="text-gray-400">RC:</strong> ${record.rc || '-'}</div>
+                        <div><strong class="text-gray-400">Capas:</strong> ${record.n_capas || '-'}</div>
+                        <div><strong class="text-gray-400">Tirada:</strong> ${record.tirada || '-'}</div>
+                        <div><strong class="text-gray-400">Velocidad:</strong> ${record.velocidad || '-'}</div>
+                        <div><strong class="text-gray-400">C1 T/R:</strong> ${record.cajon1_temp || '-'}/${record.cajon1_rev || '-'}</div>
+                        <div><strong class="text-gray-400">C2 T/R:</strong> ${record.cajon2_temp || '-'}/${record.cajon2_rev || '-'}</div>
+                        <div><strong class="text-gray-400">C3 T/R:</strong> ${record.cajon3_temp || '-'}/${record.cajon3_rev || '-'}</div>
+                        <div><strong class="text-gray-400">C4 T/R:</strong> ${record.cajon4_temp || '-'}/${record.cajon4_rev || '-'}</div>
+                        <div><strong class="text-gray-400">Estiramiento:</strong> ${record.mesa_estiramiento || '-'}</div>
+                    </div>
+                `;
+                recordsContainer.appendChild(card);
+            });
+            document.querySelectorAll('.delete-btn').forEach(b => b.addEventListener('click', (e) => openDeleteModal(e.currentTarget.getAttribute('data-id'))));
+        }
+        
+        function applyFilters() {
+            const field = searchField.value;
+            const value = document.getElementById('searchValue')?.value || '';
+            const filtered = (value === 'todos' || !value) ? allRecords : allRecords.filter(r => r[field] && r[field].toString().toLowerCase().includes(value.toLowerCase()));
+            renderRecords(filtered);
+        }
+
+        function updateSearchInput() {
+            const field = searchField.value;
+            const values = uniqueFieldValues[field] || [];
+            searchValueContainer.innerHTML = '';
+            const hasValues = values.length > 0;
+            const el = document.createElement(hasValues ? 'select' : 'input');
+            el.id = 'searchValue';
+            el.className = 'input w-full p-2 rounded-md text-sm';
+            if (hasValues) {
+                el.innerHTML = `<option value="todos">-- Todos --</option>` + values.map(v => `<option value="${v}">${v}</option>`).join('');
+                el.addEventListener('change', applyFilters);
+            } else {
+                el.type = 'text';
+                el.placeholder = `Buscar por ${field}...`;
+                el.addEventListener('input', applyFilters);
+            }
+            searchValueContainer.appendChild(el);
+        }
+        
+        searchField.addEventListener('change', () => {
+            updateSearchInput();
+            applyFilters();
+        });
+    </script>
+</body>
+</html>
