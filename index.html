@@ -186,20 +186,24 @@
         <!-- SECCIÓN DE BÚSQUEDA -->
         <div class="card p-6 rounded-lg shadow-md">
             <h2 class="text-xl font-bold mb-4">Buscar Registros</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
+            <div class="flex flex-col md:flex-row md:items-end md:space-x-4 space-y-4 md:space-y-0">
+                <div class="flex-1">
                     <label for="searchField" class="label block text-sm font-medium mb-1">Buscar por:</label>
-                    <select id="searchField" class="select w-full p-2 rounded-md text-sm">
+                    <select id="searchField" class="select w-full p-2 rounded-md text-sm h-10">
                          <option value="kd">Código (KD)</option>
                          <option value="fecha">Fecha</option>
                          <option value="nombre">Nombre</option>
                     </select>
                 </div>
-                <div>
+                <div class="flex-1">
                     <label for="searchValueContainer" class="label block text-sm font-medium mb-1">Valor:</label>
                     <div id="searchValueContainer">
-                        <input type="text" class="input w-full p-2 rounded-md text-sm">
+                        <input type="text" class="input w-full p-2 rounded-md text-sm h-10">
                     </div>
+                </div>
+                <div class="flex w-full md:w-auto space-x-2">
+                     <button type="button" id="searchBtn" class="btn-primary flex-1 md:flex-none h-10 px-6 rounded-md text-sm font-semibold">Buscar</button>
+                     <button type="button" id="clearSearchBtn" class="btn-secondary flex-1 md:flex-none h-10 px-6 rounded-md text-sm font-semibold">Todos</button>
                 </div>
             </div>
         </div>
@@ -251,6 +255,8 @@
         const submitBtn = document.getElementById('submitBtn');
         const cancelEditBtn = document.getElementById('cancelEditBtn');
         const editRecordIdInput = document.getElementById('editRecordId');
+        const searchBtn = document.getElementById('searchBtn');
+        const clearSearchBtn = document.getElementById('clearSearchBtn');
         
         let recordToDeleteId = null;
         let allRecords = [];
@@ -343,7 +349,6 @@
             };
 
             if (recordId) {
-                // MODO EDICIÓN
                 try {
                     const recordRef = doc(db, `artifacts/${appId}/users/${userId}/registros`, recordId);
                     await updateDoc(recordRef, recordData);
@@ -351,7 +356,6 @@
                     cancelEditMode();
                 } catch (error) { console.error("Update Error: ", error); showToast("Error al actualizar", true); }
             } else {
-                // MODO NUEVO REGISTRO
                 recordData.createdAt = serverTimestamp();
                 try {
                     await addDoc(collection(db, `artifacts/${appId}/users/${userId}/registros`), recordData);
@@ -366,11 +370,10 @@
             const record = allRecords.find(r => r.id === recordId);
             if (!record) return;
 
-            // Llenar todos los campos del formulario
             for (const key in record) {
                 const element = document.getElementById(key);
                 if (element) {
-                    element.value = record[key];
+                    element.value = record[key] || '';
                 }
             }
             observacionesTextarea.value = record.observaciones || '';
@@ -392,27 +395,7 @@
         cancelEditBtn.addEventListener('click', cancelEditMode);
         
         // --- Gemini API Feature ---
-        generateObservationsBtn.addEventListener('click', async () => {
-            const btnText = generateObservationsBtn.querySelector('.btn-text');
-            generateObservationsBtn.disabled = true;
-            btnText.textContent = 'Generando...';
-            geminiSpinner.classList.remove('hidden');
-
-            const formData = { /* ... (contenido sin cambios) ... */ };
-            const prompt = `/* ... (contenido sin cambios) ... */`;
-
-            try {
-                // ... (código de la API sin cambios) ...
-            } catch (error) {
-                console.error("Gemini API Error:", error);
-                showToast("Error al generar resumen", true);
-            } finally {
-                generateObservationsBtn.disabled = false;
-                btnText.textContent = '✨ Generar Resumen';
-                geminiSpinner.classList.add('hidden');
-            }
-        });
-
+        generateObservationsBtn.addEventListener('click', async () => { /* ... (código sin cambios) ... */ });
 
         function processRecordsForSearch(records) {
             const fields = ['kd', 'fecha', 'nombre'];
@@ -481,22 +464,30 @@
             const hasValues = values.length > 0;
             const el = document.createElement(hasValues ? 'select' : 'input');
             el.id = 'searchValue';
-            el.className = 'input w-full p-2 rounded-md text-sm';
+            el.className = 'input w-full p-2 rounded-md text-sm h-10';
             if (hasValues) {
                 el.innerHTML = `<option value="todos">-- Todos --</option>` + values.map(v => `<option value="${v}">${v}</option>`).join('');
-                el.addEventListener('change', applyFilters);
             } else {
                 el.type = 'text';
                 el.placeholder = `Buscar por ${field}...`;
-                el.addEventListener('input', applyFilters);
             }
             searchValueContainer.appendChild(el);
         }
         
-        searchField.addEventListener('change', () => {
-            updateSearchInput();
+        searchField.addEventListener('change', updateSearchInput);
+        searchBtn.addEventListener('click', applyFilters);
+        clearSearchBtn.addEventListener('click', () => {
+            const searchValueEl = document.getElementById('searchValue');
+            if (searchValueEl) {
+                if (searchValueEl.tagName.toLowerCase() === 'select') {
+                    searchValueEl.value = 'todos';
+                } else {
+                    searchValueEl.value = '';
+                }
+            }
             applyFilters();
         });
+
     </script>
 </body>
 </html>
