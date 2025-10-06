@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Datos Línea Roca</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .form-input, .form-select {
+            background-color: #1f2937;
+            border: 1px solid #4b5563;
+            color: #d1d5db;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        /* Style for date input placeholder */
+        input[type="date"]:required:invalid::-webkit-datetime-edit {
+            color: #6b7280;
+        }
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px #1e40af;
+        }
+        .card {
+            background-color: #1f2937;
+            border: 1px solid #374151;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        /* Estilos para el Modal */
+        .modal-backdrop {
+            background-color: rgba(0, 0, 0, 0.7);
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-200 min-h-screen">
+
+    <div class="container mx-auto p-4 md:p-8 max-w-7xl">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl md:text-4xl font-bold text-white tracking-tight">Datos Línea Roca</h1>
+            <p class="text-gray-400 mt-2">Introduce y busca registros de la Línea Roca.</p>
+        </header>
+
+        <!-- Formulario para añadir nuevos productos -->
+        <div class="bg-gray-800 p-6 rounded-xl shadow-lg mb-8 border border-gray-700">
+            <h2 class="text-2xl font-semibold mb-6 text-white">Añadir Nuevo Registro de Producción</h2>
+            <form id="add-item-form">
+                <!-- SECCIÓN PRODUCTO -->
+                <fieldset class="border border-gray-600 p-4 rounded-md mb-6">
+                    <legend class="text-lg font-medium text-white px-2">PRODUCTO</legend>
+                    <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                        <input type="text" id="prod-codigo" placeholder="CÓDIGO (KD)" required class="form-input rounded-md p-2">
+                        <input type="text" id="prod-nombre" placeholder="NOMBRE" required class="form-input rounded-md p-2">
+                        <input type="number" step="any" id="prod-espesor" placeholder="ESPESOR" class="form-input rounded-md p-2">
+                        <input type="number" step="any" id="prod-largo" placeholder="LARGO" class="form-input rounded-md p-2">
+                        <input type="number" step="any" id="prod-ancho" placeholder="ANCHO" class="form-input rounded-md p-2">
+                    </div>
+                </fieldset>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                    <!-- PARÁMETROS GENERALES -->
+                    <div class="space-y-4">
+                        <div>
+                            <label for="param-fecha" class="block text-sm font-medium text-gray-300 mb-1">Fecha de Fabricación</label>
+                            <input type="date" id="param-fecha" required class="form-input w-full rounded-md p-2">
+                        </div>
+                        <input type="text" id="param-rc" placeholder="RC" class="form-input w-full rounded-md p-2">
+                        <input type="number" id="param-capas" placeholder="Nº CAPAS" class="form-input w-full rounded-md p-2">
+                        <input type="text" id="param-tirada" placeholder="TIRADA" class="form-input w-full rounded-md p-2">
+                        <input type="number" step="any" id="param-velocidad" placeholder="VELOCIDAD" class="form-input w-full rounded-md p-2">
+                        <input type="text" id="param-estiramiento" placeholder="ESTIRAMIENTO MESA ENFRIAMIENTO" class="form-input w-full rounded-md p-2">
+                    </div>
+                     <!-- PARÁMETROS DE PROCESO -->
+                    <div class="space-y-4">
+                        <input type="number" step="any" id="proc-peso" placeholder="PESO BASCULA" class="form-input w-full rounded-md p-2">
+                        <input type="text" id="proc-ancho" placeholder="ANCHO PR./Kn" class="form-input w-full rounded-md p-2">
+                        <input type="text" id="proc-estufa" placeholder="ESTUFA" class="form-input w-full rounded-md p-2">
+                        <input type="text" id="proc-pulidora" placeholder="PULIDORA" class="form-input w-full rounded-md p-2">
+                    </div>
+                    <!-- ESTUFA -->
+                    <fieldset class="border border-gray-600 p-4 rounded-md">
+                        <legend class="text-lg font-medium text-white px-2">ESTUFA</legend>
+                        <div class="space-y-2">
+                            <div class="grid grid-cols-3 gap-2 items-center"><span class="col-span-1">CAJON Nº1</span> <input type="number" step="any" id="estufa-temp1" placeholder="TEMP" class="form-input p-1 rounded-md"> <input type="number" step="any" id="estufa-rev1" placeholder="REV" class="form-input p-1 rounded-md"></div>
+                            <div class="grid grid-cols-3 gap-2 items-center"><span class="col-span-1">CAJON Nº2</span> <input type="number" step="any" id="estufa-temp2" placeholder="TEMP" class="form-input p-1 rounded-md"> <input type="number" step="any" id="estufa-rev2" placeholder="REV" class="form-input p-1 rounded-md"></div>
+                            <div class="grid grid-cols-3 gap-2 items-center"><span class="col-span-1">CAJON Nº3</span> <input type="number" step="any" id="estufa-temp3" placeholder="TEMP" class="form-input p-1 rounded-md"> <input type="number" step="any" id="estufa-rev3" placeholder="REV" class="form-input p-1 rounded-md"></div>
+                            <div class="grid grid-cols-3 gap-2 items-center"><span class="col-span-1">CAJON Nº4</span> <input type="number" step="any" id="estufa-temp4" placeholder="TEMP" class="form-input p-1 rounded-md"> <input type="number" step="any" id="estufa-rev4" placeholder="REV" class="form-input p-1 rounded-md"></div>
+                        </div>
+                    </fieldset>
+                </div>
+
+                 <!-- CREPADORA -->
+                <fieldset class="border border-gray-600 p-4 rounded-md mb-6">
+                    <legend class="text-lg font-medium text-white px-2">CREPADORA</legend>
+                    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                        <input type="text" id="crep-h1" placeholder="H1" class="form-input rounded-md p-2">
+                        <input type="text" id="crep-h2" placeholder="H2" class="form-input rounded-md p-2">
+                        <input type="text" id="crep-h3" placeholder="H3" class="form-input rounded-md p-2">
+                        <input type="text" id="crep-h4" placeholder="H4" class="form-input rounded-md p-2">
+                        <input type="text" id="crep-h5" placeholder="H5" class="form-input rounded-md p-2">
+                        <input type="text" id="crep-h6" placeholder="H6" class="form-input rounded-md p-2">
+                    </div>
+                </fieldset>
+
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-md transition-colors duration-200 shadow-lg text-lg">
+                    Guardar Registro
+                </button>
+            </form>
+        </div>
+
+        <!-- Sección de búsqueda -->
+        <div class="bg-gray-800 p-6 rounded-xl shadow-lg mb-8 border border-gray-700">
+             <h2 class="text-2xl font-semibold mb-4 text-white">Buscar Registros</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="md:col-span-2">
+                    <input type="text" id="search-input" class="form-input w-full rounded-md p-2" placeholder="Término de búsqueda...">
+                </div>
+                <select id="search-param" class="form-select w-full rounded-md p-2">
+                    <option value="producto.codigo">Código (KD)</option>
+                    <option value="producto.nombre">Nombre Producto</option>
+                    <option value="general.fecha">Fecha Fabricación</option>
+                    <option value="general.rc">RC</option>
+                    <option value="proceso.pulidora">Pulidora</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Lista de productos -->
+        <div>
+            <h2 class="text-2xl font-semibold mb-4 text-white">Registros en la Base de Datos</h2>
+            <div id="item-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- Los productos se insertarán aquí dinámicamente -->
+                 <p id="no-results" class="text-gray-400 col-span-full text-center">Cargando registros...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para ver detalles -->
+    <div id="details-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 hidden">
+        <div class="modal-backdrop fixed inset-0"></div>
+        <div class="bg-gray-800 border border-gray-600 rounded-xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto relative z-10 p-6">
+            <h2 class="text-2xl font-bold text-white mb-4" id="modal-title">Detalles del Registro</h2>
+            <div id="modal-content" class="text-gray-300 space-y-4"></div>
+            <button id="modal-close-btn" class="absolute top-4 right-4 text-gray-400 hover:text-white">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+        </div>
+    </div>
+
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, where, getDocs, orderBy } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+
+        // --- Configuración de Firebase ---
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        
+        signInAnonymously(auth).catch((error) => console.error("Error de autenticación:", error));
+
+        const itemsCollectionRef = collection(db, `artifacts/${appId}/public/data/production_items`);
+
+        // --- Referencias a elementos del DOM ---
+        const addItemForm = document.getElementById('add-item-form');
+        const searchInput = document.getElementById('search-input');
+        const searchParam = document.getElementById('search-param');
+        const itemList = document.getElementById('item-list');
+        const noResults = document.getElementById('no-results');
+        const modal = document.getElementById('details-modal');
+        const modalContent = document.getElementById('modal-content');
+        const modalTitle = document.getElementById('modal-title');
+        const modalCloseBtn = document.getElementById('modal-close-btn');
+        const modalBackdrop = document.querySelector('.modal-backdrop');
+
+        let allItems = []; // Caché local para evitar lecturas constantes en la búsqueda
+
+        function showDetailsModal(data) {
+            modalTitle.textContent = `Detalles de: ${data.producto.nombre} (${data.producto.codigo})`;
+            
+            // Función auxiliar para crear filas de detalles
+            const createDetailRow = (label, value) => value ? `<div class="grid grid-cols-2 gap-2 p-2 rounded-md hover:bg-gray-700"><strong class="font-medium text-gray-400">${label}:</strong> <span>${value}</span></div>` : '';
+            const createSectionTitle = (title) => `<h3 class="text-lg font-semibold text-white mt-4 pt-2 border-t border-gray-600">${title}</h3>`;
+
+            let content = '';
+            // Producto
+            content += createSectionTitle('Producto');
+            content += createDetailRow('Código (KD)', data.producto.codigo);
+            content += createDetailRow('Nombre', data.producto.nombre);
+            content += createDetailRow('Espesor', data.producto.espesor);
+            content += createDetailRow('Largo', data.producto.largo);
+            content += createDetailRow('Ancho', data.producto.ancho);
+            // General
+            content += createSectionTitle('Parámetros Generales');
+            content += createDetailRow('Fecha Fabricación', data.general.fecha);
+            content += createDetailRow('RC', data.general.rc);
+            content += createDetailRow('Nº Capas', data.general.capas);
+            content += createDetailRow('Tirada', data.general.tirada);
+            content += createDetailRow('Velocidad', data.general.velocidad);
+            content += createDetailRow('Estiramiento Mesa Enfriamiento', data.general.estiramiento);
+            // Proceso
+            content += createSectionTitle('Proceso');
+            content += createDetailRow('Peso Bascula', data.proceso.peso);
+            content += createDetailRow('Ancho PR./Kn', data.proceso.ancho);
+            content += createDetailRow('Estufa', data.proceso.estufa);
+            content += createDetailRow('Pulidora', data.proceso.pulidora);
+             // Estufa
+            content += createSectionTitle('Estufa');
+            for (let i = 1; i <= 4; i++) {
+                 content += createDetailRow(`Cajón ${i} - Temp`, data.estufa[`cajon${i}`]?.temperatura);
+                 content += createDetailRow(`Cajón ${i} - Rev`, data.estufa[`cajon${i}`]?.revoluciones);
+            }
+            // Crepadora
+            content += createSectionTitle('Crepadora');
+            content += createDetailRow('H1', data.crepadora.h1);
+            content += createDetailRow('H2', data.crepadora.h2);
+            content += createDetailRow('H3', data.crepadora.h3);
+            content += createDetailRow('H4', data.crepadora.h4);
+            content += createDetailRow('H5', data.crepadora.h5);
+            content += createDetailRow('H6', data.crepadora.h6);
+           
+            modalContent.innerHTML = content;
+            modal.classList.remove('hidden');
+        }
+
+        function closeDetailsModal() {
+            modal.classList.add('hidden');
+        }
+
+        modalCloseBtn.addEventListener('click', closeDetailsModal);
+        modalBackdrop.addEventListener('click', closeDetailsModal);
+
+        function displayItems(items) {
+            itemList.innerHTML = '';
+            if (items.length === 0) {
+                noResults.textContent = "No se encontraron resultados.";
+                noResults.classList.remove('hidden');
+                return;
+            }
+            
+            noResults.classList.add('hidden');
+
+            items.forEach(doc => {
+                const item = doc.data();
+                const itemCard = document.createElement('div');
+                itemCard.className = 'card rounded-lg p-4 shadow-md flex flex-col justify-between';
+                itemCard.innerHTML = `
+                    <div>
+                        <h3 class="font-bold text-lg text-white">${item.producto.nombre}</h3>
+                        <p class="text-sm text-gray-400">Código: <span class="font-medium text-gray-300">${item.producto.codigo}</span></p>
+                        <p class="text-sm text-gray-400">Fabricación: <span class="font-medium text-gray-300">${item.general.fecha}</span></p>
+                    </div>
+                    <button class="view-details-btn mt-4 w-full bg-gray-600 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-md transition-colors duration-200">
+                        Ver Detalles
+                    </button>
+                `;
+                itemCard.querySelector('.view-details-btn').addEventListener('click', () => showDetailsModal(item));
+                itemList.appendChild(itemCard);
+            });
+        }
+        
+        async function performSearch() {
+            const searchTerm = searchInput.value.trim();
+            if (!searchTerm) {
+                displayItems(allItems); // Muestra todos los items cacheados si la búsqueda está vacía
+                return;
+            }
+            
+            const parameter = searchParam.value;
+            try {
+                // Como las fechas se guardan como string 'YYYY-MM-DD', la búsqueda "==" debe ser exacta.
+                const q = query(itemsCollectionRef, where(parameter, "==", searchTerm));
+                const querySnapshot = await getDocs(q);
+                displayItems(querySnapshot.docs);
+            } catch (error) {
+                console.error("Error al buscar documentos: ", error);
+                itemList.innerHTML = '<p class="text-red-500 col-span-full text-center">Error al realizar la búsqueda.</p>';
+            }
+        }
+
+        function listenForItems() {
+             noResults.textContent = "Cargando registros...";
+             noResults.classList.remove('hidden');
+             const q = query(itemsCollectionRef, orderBy("createdAt", "desc"));
+            onSnapshot(q, (snapshot) => {
+                allItems = snapshot.docs; // Actualiza la caché local
+                displayItems(allItems);
+            }, (error) => {
+                console.error("Error al obtener datos en tiempo real:", error);
+                noResults.textContent = "Error al cargar los datos.";
+            });
+        }
+
+
+        // --- Event Listeners ---
+        addItemForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const newItem = {
+                producto: {
+                    codigo: document.getElementById('prod-codigo').value,
+                    nombre: document.getElementById('prod-nombre').value,
+                    espesor: document.getElementById('prod-espesor').value,
+                    largo: document.getElementById('prod-largo').value,
+                    ancho: document.getElementById('prod-ancho').value,
+                },
+                general: {
+                    fecha: document.getElementById('param-fecha').value,
+                    rc: document.getElementById('param-rc').value,
+                    capas: document.getElementById('param-capas').value,
+                    tirada: document.getElementById('param-tirada').value,
+                    velocidad: document.getElementById('param-velocidad').value,
+                    estiramiento: document.getElementById('param-estiramiento').value,
+                },
+                proceso: {
+                    peso: document.getElementById('proc-peso').value,
+                    ancho: document.getElementById('proc-ancho').value,
+                    estufa: document.getElementById('proc-estufa').value,
+                    pulidora: document.getElementById('proc-pulidora').value,
+                },
+                estufa: {
+                    cajon1: { temperatura: document.getElementById('estufa-temp1').value, revoluciones: document.getElementById('estufa-rev1').value },
+                    cajon2: { temperatura: document.getElementById('estufa-temp2').value, revoluciones: document.getElementById('estufa-rev2').value },
+                    cajon3: { temperatura: document.getElementById('estufa-temp3').value, revoluciones: document.getEl
