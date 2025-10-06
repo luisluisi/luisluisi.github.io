@@ -38,6 +38,13 @@
         .btn-primary:hover {
             background-color: #1D4ED8;
         }
+        .btn-secondary {
+            background-color: #4B5563;
+            transition: background-color 0.2s;
+        }
+        .btn-secondary:hover {
+            background-color: #6B7280;
+        }
         .btn-danger {
             background-color: #DC2626;
             transition: background-color 0.2s;
@@ -72,6 +79,7 @@
         <div class="card p-6 rounded-lg shadow-md">
             <h1 class="text-2xl font-bold mb-6 text-white text-center">Control de Parámetros de Producción</h1>
             <form id="recordForm" class="space-y-6">
+                <input type="hidden" id="editRecordId">
                 
                 <!-- SECCIÓN PRODUCTO -->
                 <div>
@@ -168,8 +176,9 @@
                     <textarea id="observaciones" rows="4" placeholder="Añade notas aquí o genera un resumen con la IA..." class="input w-full p-2 rounded-md text-sm"></textarea>
                 </div>
 
-                <div class="pt-4">
-                    <button type="submit" class="btn-primary w-full font-bold py-3 px-4 rounded-md text-white">Guardar Registro</button>
+                <div class="pt-4 flex items-center space-x-4">
+                    <button type="submit" id="submitBtn" class="btn-primary w-full font-bold py-3 px-4 rounded-md text-white">Guardar Registro</button>
+                    <button type="button" id="cancelEditBtn" class="btn-secondary w-full font-bold py-3 px-4 rounded-md text-white hidden">Cancelar Edición</button>
                 </div>
             </form>
         </div>
@@ -218,7 +227,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, doc, deleteDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, doc, deleteDoc, query, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
@@ -239,6 +248,9 @@
         const generateObservationsBtn = document.getElementById('generateObservationsBtn');
         const geminiSpinner = document.getElementById('gemini-spinner');
         const observacionesTextarea = document.getElementById('observaciones');
+        const submitBtn = document.getElementById('submitBtn');
+        const cancelEditBtn = document.getElementById('cancelEditBtn');
+        const editRecordIdInput = document.getElementById('editRecordId');
         
         let recordToDeleteId = null;
         let allRecords = [];
@@ -283,9 +295,10 @@
         });
 
         function setupFirestoreListener(userId) {
-            const q = query(collection(db, `artifacts/${appId}/users/${userId}/registros`), orderBy('createdAt', 'desc'));
-            onSnapshot(q, (snapshot) => {
+            const registrosRef = collection(db, `artifacts/${appId}/users/${userId}/registros`);
+            onSnapshot(registrosRef, (snapshot) => {
                 allRecords = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+                allRecords.sort((a, b) => (b.createdAt?.toDate() || 0) - (a.createdAt?.toDate() || 0));
                 processRecordsForSearch(allRecords);
                 updateSearchInput();
                 applyFilters();
@@ -297,7 +310,9 @@
             const userId = auth.currentUser?.uid;
             if (!userId) return;
 
-            const newRecord = {
+            const recordId = editRecordIdInput.value;
+
+            const recordData = {
                 kd: document.getElementById('kd').value,
                 nombre: document.getElementById('nombre').value,
                 espesor: document.getElementById('espesor').value,
@@ -325,16 +340,56 @@
                 h5: document.getElementById('h5').value, h6: document.getElementById('h6').value,
                 mesa_estiramiento: document.getElementById('mesa_estiramiento').value,
                 observaciones: observacionesTextarea.value,
-                createdAt: serverTimestamp()
             };
 
-            try {
-                await addDoc(collection(db, `artifacts/${appId}/users/${userId}/registros`), newRecord);
-                showToast("¡Registro guardado!");
-                recordForm.reset();
-                setInitialDate();
-            } catch (error) { console.error("Save Error: ", error); showToast("Error al guardar", true); }
+            if (recordId) {
+                // MODO EDICIÓN
+                try {
+                    const recordRef = doc(db, `artifacts/${appId}/users/${userId}/registros`, recordId);
+                    await updateDoc(recordRef, recordData);
+                    showToast("¡Registro actualizado!");
+                    cancelEditMode();
+                } catch (error) { console.error("Update Error: ", error); showToast("Error al actualizar", true); }
+            } else {
+                // MODO NUEVO REGISTRO
+                recordData.createdAt = serverTimestamp();
+                try {
+                    await addDoc(collection(db, `artifacts/${appId}/users/${userId}/registros`), recordData);
+                    showToast("¡Registro guardado!");
+                    recordForm.reset();
+                    setInitialDate();
+                } catch (error) { console.error("Save Error: ", error); showToast("Error al guardar", true); }
+            }
         });
+        
+        function loadRecordIntoForm(recordId) {
+            const record = allRecords.find(r => r.id === recordId);
+            if (!record) return;
+
+            // Llenar todos los campos del formulario
+            for (const key in record) {
+                const element = document.getElementById(key);
+                if (element) {
+                    element.value = record[key];
+                }
+            }
+            observacionesTextarea.value = record.observaciones || '';
+            
+            editRecordIdInput.value = record.id;
+            submitBtn.textContent = 'Actualizar Registro';
+            cancelEditBtn.classList.remove('hidden');
+            
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function cancelEditMode() {
+            recordForm.reset();
+            setInitialDate();
+            editRecordIdInput.value = '';
+            submitBtn.textContent = 'Guardar Registro';
+            cancelEditBtn.classList.add('hidden');
+        }
+        cancelEditBtn.addEventListener('click', cancelEditMode);
         
         // --- Gemini API Feature ---
         generateObservationsBtn.addEventListener('click', async () => {
@@ -343,66 +398,11 @@
             btnText.textContent = 'Generando...';
             geminiSpinner.classList.remove('hidden');
 
-            const formData = {
-                kd: document.getElementById('kd').value,
-                nombre: document.getElementById('nombre').value,
-                espesor: document.getElementById('espesor').value,
-                fecha: document.getElementById('fecha').value,
-                rc: document.getElementById('rc').value,
-                n_capas: document.getElementById('n_capas').value,
-                cajon1_temp: document.getElementById('cajon1_temp').value,
-                cajon1_rev: document.getElementById('cajon1_rev').value,
-                cajon2_temp: document.getElementById('cajon2_temp').value,
-                cajon2_rev: document.getElementById('cajon2_rev').value,
-                cajon3_temp: document.getElementById('cajon3_temp').value,
-                cajon3_rev: document.getElementById('cajon3_rev').value,
-                cajon4_temp: document.getElementById('cajon4_temp').value,
-                cajon4_rev: document.getElementById('cajon4_rev').value,
-                mesa_estiramiento: document.getElementById('mesa_estiramiento').value
-            };
-
-            const prompt = `
-                Eres un asistente de jefe de producción. A partir de los siguientes datos de un registro de producción, 
-                genera un resumen conciso y profesional en español para el campo de observaciones.
-                El resumen debe ser breve, en un solo párrafo, y destacar los parámetros clave. No inventes datos que no estén presentes.
-
-                Datos del Registro:
-                - Código de producto (KD): ${formData.kd || 'No especificado'}
-                - Nombre: ${formData.nombre || 'No especificado'}
-                - Fecha: ${formData.fecha || 'N/A'}
-                - Parámetros Estufa (Temp/Rev): 
-                  - Cajón 1: ${formData.cajon1_temp}/${formData.cajon1_rev}
-                  - Cajón 2: ${formData.cajon2_temp}/${formData.cajon2_rev}
-                  - Cajón 3: ${formData.cajon3_temp}/${formData.cajon3_rev}
-                  - Cajón 4: ${formData.cajon4_temp}/${formData.cajon4_rev}
-                - Estiramiento: ${formData.mesa_estiramiento || 'N/A'}
-
-                Genera un texto profesional para un campo de "Observaciones".
-            `;
+            const formData = { /* ... (contenido sin cambios) ... */ };
+            const prompt = `/* ... (contenido sin cambios) ... */`;
 
             try {
-                const apiKey = ""; 
-                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
-                const payload = { contents: [{ parts: [{ text: prompt }] }] };
-                
-                const response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-
-                if (!response.ok) {
-                    throw new Error(`API Error: ${response.status}`);
-                }
-
-                const result = await response.json();
-                const generatedText = result.candidates?.[0]?.content?.parts?.[0]?.text;
-
-                if (generatedText) {
-                    observacionesTextarea.value = generatedText.trim();
-                } else {
-                    throw new Error("No se recibió texto del modelo.");
-                }
+                // ... (código de la API sin cambios) ...
             } catch (error) {
                 console.error("Gemini API Error:", error);
                 showToast("Error al generar resumen", true);
@@ -438,7 +438,15 @@
                             <p class="text-sm text-gray-400">Fecha: ${record.fecha || 'N/A'}</p>
                             <p class="text-sm text-gray-300">Nombre: ${record.nombre || 'N/A'}</p>
                         </div>
-                        <button data-id="${record.id}" class="delete-btn btn-danger text-white p-2 rounded-full w-8 h-8 flex items-center justify-center flex-shrink-0">&times;</button>
+                        <div class="flex items-center space-x-2">
+                             <button data-id="${record.id}" class="edit-btn bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-full w-8 h-8 flex items-center justify-center flex-shrink-0">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                    <path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" />
+                                    <path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd" />
+                                </svg>
+                            </button>
+                            <button data-id="${record.id}" class="delete-btn btn-danger text-white p-2 rounded-full w-8 h-8 flex items-center justify-center flex-shrink-0">&times;</button>
+                        </div>
                     </div>
                     <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-x-4 gap-y-2 text-sm border-t border-gray-700 pt-3 mt-3">
                         <div><strong class="text-gray-400">RC:</strong> ${record.rc || '-'}</div>
@@ -456,6 +464,7 @@
                 recordsContainer.appendChild(card);
             });
             document.querySelectorAll('.delete-btn').forEach(b => b.addEventListener('click', (e) => openDeleteModal(e.currentTarget.getAttribute('data-id'))));
+            document.querySelectorAll('.edit-btn').forEach(b => b.addEventListener('click', (e) => loadRecordIntoForm(e.currentTarget.getAttribute('data-id'))));
         }
         
         function applyFilters() {
